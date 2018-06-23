@@ -9,8 +9,15 @@ buildscript {
     }
 }
 
+plugins {
+    id "com.jfrog.bintray" version "1.8.2"
+    id "maven-publish"
+}
+
+def helloGradlePluginVersion = '0.0.1' // bintrayは「SNAPSHOT」がついているとエラーになる
+
 group 'com.maeharin'
-version '1.0-SNAPSHOT'
+version  helloGradlePluginVersion
 
 apply plugin: 'kotlin'
 
@@ -33,4 +40,33 @@ compileTestKotlin {
 
 test {
     useJUnitPlatform()
+}
+
+publishing {
+    publications {
+        MyPublication(MavenPublication) {
+            from components.java
+            groupId 'com.maeharin'
+            artifactId 'hello-gradle-plugin'
+            version '0.0.1'
+        }
+    }
+}
+
+bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_KEY')
+    publications = ['MyPublication']
+
+    pkg {
+        repo = 'hello-gradle-plugin' // bintray側に作ったリポジトリ名
+        name = 'hello-gradle-plugin' // このパッケージの名前
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/maeharin/hello-gradle-plugin' // githubのurl
+        version {
+            name = helloGradlePluginVersion
+            desc = 'hello world grale plugin'
+        }
+        publish = true // auto publish
+    }
 }
